@@ -31,7 +31,7 @@ set interfaces ethernet eth3 address '2001:1470:fffd:94:3::1/64'
 set interfaces ethernet eth3 description 'IPV6only'
 # Gateway
 set protocols static route 0.0.0.0/0 next-hop 88.200.24.1
-set protocols static route6 ::/0 next-hop 2001:1470:fffd:94::
+set protocols static route6 ::/0 next-hop 2001:1470:fffd:94::1
 # SSH
 set service ssh port 22
 # Dhcp
@@ -56,6 +56,15 @@ set nat source rule 100 translation address 'masquerade'
 set nat source rule 110 outbound-interface 'eth0'
 set nat source rule 110 source address '10.6.0.0/24'
 set nat source rule 110 translation address 'masquerade'
+
+# DNS
+set system name-server 8.8.8.8
+set system name-server 8.8.4.4
+set service dns forwarding name-server 8.8.8.8
+set service dns forwarding name-server 8.8.4.4
+set service dns forwarding allow-from 192.168.6.0/24
+set service dns forwarding allow-from 10.6.0.0/24
+set system ipv6 forwarding enable
 
 # Firewall
 # Define default firewall policies
@@ -94,7 +103,6 @@ set interfaces ethernet eth2 firewall in name 'INTERNAL_IN'
 set interfaces ethernet eth2 firewall local name 'INTERNAL_LOCAL'
 set interfaces ethernet eth1 firewall in name 'DMZ_IN'
 set interfaces ethernet eth1 firewall local name 'DMZ_LOCAL'
-
 
 commit
 save
