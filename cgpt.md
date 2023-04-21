@@ -202,29 +202,22 @@ New chat
 
 #### TO SVA PA MI2 nrdila
 
-vyos@vyos:~$ configure
-[edit]
-vyos@vyos# ls                                                                                                                  [edit]
-vyos@vyos# set service dhcp-server shared-network-name INTERNAL subnet 192.168.6.0/24 default-router 192.168.6.1
-[edit]
-vyos@vyos# set service dhcp-server shared-network-name INTERNAL subnet 192.168.6.0/24 dns-server 192.168.6.1
-[edit]
-vyos@vyos# set service dhcp-server shared-network-name INTERNAL subnet 192.168.6.0/24 range 0 start 192.168.6.100
-[edit]
-vyos@vyos# set service dhcp-server shared-network-name INTERNAL subnet 192.168.6.0/24 range 0 stop 192.168.6.200
-[edit]
-vyos@vyos#
-[edit]
-vyos@vyos# set service dhcp-server shared-network-name DMZ subnet 10.6.0.0/24 default-router 10.6.0.1
-[edit]
-vyos@vyos# set service dhcp-server shared-network-name DMZ subnet 10.6.0.0/24 dns-server 10.6.0.1
-[edit]
-vyos@vyos# set service dhcp-server shared-network-name DMZ subnet 10.6.0.0/24 range 0 start 10.6.0.100
-[edit]
-vyos@vyos# set service dhcp-server shared-network-name DMZ subnet 10.6.0.0/24 range 0 stop 10.6.0.200
-[edit]
-vyos@vyos# commit
-[edit]
+set service dhcp-server shared-network-name INTERNAL subnet 192.168.6.0/24 default-router 192.168.6.1
+
+set service dhcp-server shared-network-name INTERNAL subnet 192.168.6.0/24 dns-server 192.168.6.1
+
+set service dhcp-server shared-network-name INTERNAL subnet 192.168.6.0/24 range 0 start 192.168.6.100
+
+set service dhcp-server shared-network-name INTERNAL subnet 192.168.6.0/24 range 0 stop 192.168.6.200
+
+set service dhcp-server shared-network-name DMZ subnet 10.6.0.0/24 default-router 10.6.0.1
+
+set service dhcp-server shared-network-name DMZ subnet 10.6.0.0/24 dns-server 10.6.0.1
+
+set service dhcp-server shared-network-name DMZ subnet 10.6.0.0/24 range 0 start 10.6.0.100
+
+set service dhcp-server shared-network-name DMZ subnet 10.6.0.0/24 range 0 stop 10.6.0.200
+
 
 
 
