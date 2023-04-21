@@ -57,6 +57,45 @@ set nat source rule 110 outbound-interface 'eth0'
 set nat source rule 110 source address '10.6.0.0/24'
 set nat source rule 110 translation address 'masquerade'
 
+# Firewall
+# Define default firewall policies
+set firewall name PUBLIC_IN default-action 'drop'
+set firewall name PUBLIC_LOCAL default-action 'drop'
+set firewall name INTERNAL_IN default-action 'accept'
+set firewall name INTERNAL_LOCAL default-action 'accept'
+set firewall name DMZ_IN default-action 'accept'
+set firewall name DMZ_LOCAL default-action 'accept'
+
+# Allow established and related traffic in the PUBLIC_IN firewall
+set firewall name PUBLIC_IN rule 10 action 'accept'
+set firewall name PUBLIC_IN rule 10 state established 'enable'
+set firewall name PUBLIC_IN rule 10 state related 'enable'
+
+# Allow ICMP (ping) in the PUBLIC_IN firewall
+set firewall name PUBLIC_IN rule 20 action 'accept'
+set firewall name PUBLIC_IN rule 20 icmp type-name 'echo-request'
+set firewall name PUBLIC_IN rule 20 protocol 'icmp'
+
+# Allow SSH access in the PUBLIC_IN firewall
+set firewall name PUBLIC_IN rule 40 action 'accept'
+set firewall name PUBLIC_IN rule 40 destination port '22'
+set firewall name PUBLIC_IN rule 40 protocol 'tcp'
+
+# Allow specific inbound services from public network to DMZ
+# Example: Allow HTTP (TCP port 80) and HTTPS (TCP port 443)
+set firewall name PUBLIC_IN rule 30 action 'accept'
+set firewall name PUBLIC_IN rule 30 destination port '80,443'
+set firewall name PUBLIC_IN rule 30 protocol 'tcp'
+
+# Apply firewall policies to the interfaces
+set interfaces ethernet eth0 firewall in name 'PUBLIC_IN'
+set interfaces ethernet eth0 firewall local name 'PUBLIC_LOCAL'
+set interfaces ethernet eth2 firewall in name 'INTERNAL_IN'
+set interfaces ethernet eth2 firewall local name 'INTERNAL_LOCAL'
+set interfaces ethernet eth1 firewall in name 'DMZ_IN'
+set interfaces ethernet eth1 firewall local name 'DMZ_LOCAL'
+
+
 commit
 save
 exit
