@@ -14,15 +14,53 @@
       apt:
         pkg:
           - ntp
+          - tzdata
+          - ntpdate
         state: latest
         update_cache: true
 
     - name: Add namserver to ntp.conf
       lineinfile:
         path: /etc/ntp.conf
-        line: "server {{ custom_ntp_server }} iburst"
+        line: "pool {{ custom_ntp_server }} iburst"
         insertafter: EOF
         state: present
+      notify: Restart ntp
+
+    - name: Set global timezone
+      ansible.builtin.copy:
+        content: "Europe/Ljubljana"
+        dest: /etc/timezone
+        owner: root
+        group: root
+        mode: 0644
+      notify: 
+        - Update localtime
+
+    - name: Set to use local timezone and not UTC
+      ansible.builtin.shell: 'timedatectl set-local-rtc 1'
+
+    - name: Set timezone  
+      ansible.builtin.shell: 'timedatectl set-timezone "Europe/Ljubljana"'
+
+    - name: Force the use of our custom timeserver
+      ansible.builtin.shell: "ntpdate -u {{ custom_ntp_server }}"
+
+    - name: Get current date
+      ansible.builtin.shell: "date"
+      register: current_date
+
+    - name: Print current date
+      ansible.builtin.debug:
+        msg: "{{ current_date.stdout }}"
+   
+  handlers:
+
+    - name: Update localtime
+      command: ln -sf /usr/share/zoneinfo/{{ lookup('file', '/etc/timezone') }} /etc/localtime
+      args:
+        creates: /etc/localtime
+        removes: /etc/localtime
 
     - name: Restart ntp
       ansible.builtin.systemd:
