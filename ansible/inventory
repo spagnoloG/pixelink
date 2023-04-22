@@ -1,0 +1,8 @@
+[proxy]
+jump_host ansible_host=88.200.24.236 ansible_user=vyos ansible_ssh_private_key_file=~/.ssh/keys/id_ed25519_rk_vyos become=true become_method=sudo
+
+[DMZ]
+dmz_nameserver ansible_host=10.6.0.100 ansible_connection=ssh ansible_user=ubuntu_dmz ansible_ssh_pass=laboratorijzaintegracijo become=true become_method=sudo ansible_become_pass=laboratorijzaintegracijo
+
+[DMZ:vars]
+ansible_ssh_common_args='-o ProxyCommand="ssh -i ~/.ssh/keys/id_ed25519_rk_vyos -W %h:%p -q vyos@88.200.24.236"'
