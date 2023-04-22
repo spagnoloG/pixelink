@@ -14,9 +14,15 @@
         state: latest
         update_cache: true
 
+    - name: Disable systemd-resolved
+      ansible.builtin.systemd:
+        name: systemd-resolved
+        state: stopped
+        enabled: false
+
     - name: Copy unbound config
       copy:
-        src: unbound.conf
+        src: ../files/dns/unbound.conf
         dest: /etc/unbound/unbound.conf
         owner: root
         group: root
