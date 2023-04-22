@@ -20,6 +20,6 @@ ansible-galaxy install -r requirements.yml
 
 ### Setup DMZ nameserver
 ```bash
-ansible-playbook -i inventory playbooks/00-setup-dns-server.yml --limit dmz_nameserver
+make dmz_nameserver
 ```
 

@@ -1,0 +1,30 @@
+---
+- name: Setup ntp 
+  hosts: all
+  become: true
+  strategy: free
+  gather_facts: true
+  become_method: sudo
+  vars:
+    - custom_ntp_server: 2.si.pool.ntp.org
+
+  tasks:
+
+    - name: Install required system packages
+      apt:
+        pkg:
+          - ntp
+        state: latest
+        update_cache: true
+
+    - name: Add namserver to ntp.conf
+      lineinfile:
+        path: /etc/ntp.conf
+        line: "server {{ custom_ntp_server }} iburst"
+        insertafter: EOF
+        state: present
+
+    - name: Restart ntp
+      ansible.builtin.systemd:
+        name: ntp
+        state: restarted
