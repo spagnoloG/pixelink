@@ -1,5 +1,5 @@
 ---
-- name: Setup ntp 
+- name: Setup freeipa server (LDAP) - Fedora
   hosts: all
   become: true
   strategy: free
@@ -9,6 +9,7 @@
     - ipa_fqdn: ipa.kp.org
     - admin_password: admin12345
     - ds_password: admin12345
+    - custom_ntp_server: 2.si.pool.ntp.org
   tasks:
     - name: Install cockpit
       ansible.builtin.command: dnf -y install cockpit
@@ -16,62 +17,71 @@
 
     - name: Enable cockpit
       ansible.builtin.command: systemctl enable --now cockpit.socket
+      when: ansible_distribution == "Fedora"
 
     - name: Add firewall rule for freeipa 
       ansible.builtin.command: firewall-cmd --add-service=freeipa-ldap --add-service=freeipa-ldaps --permanent
+      when: ansible_distribution == "Fedora"
 
-    - name: Install freeipa
-      ansible.builtin.command: dnf -y install freeipa-server freeipa-server-dns bind-dyndb-ldap
+    - name: Add fqdn to /etc/hosts
+      ansible.builtin.lineinfile:
+        path: /etc/hosts
+        line: "{{ ansible_default_ipv4.address }} {{ ipa_fqdn }} ipa"
+      when: ansible_distribution == "Fedora"
+
+    - name: Reload the firewall
+      ansible.builtin.command: firewall-cmd --reload
+      when: ansible_distribution == "Fedora"
 
     - name: "Set hostname to {{ ipa_fqdn }}" 
       ansible.builtin.command: "hostnamectl set-hostname {{ ipa_fqdn }}"
+      when: ansible_distribution == "Fedora"
 
     - name: Add hostname to /etc/hosts
       ansible.builtin.lineinfile:
         path: /etc/hosts
         line: "{{ ansible_default_ipv4.address }} {{ ipa_fqdn }} ipa"
-
-
-    - name: Disable ipv6 for now
-      ansible.builtin.lineinfile:
-        path: /etc/sysctl.conf
-        line: "net.ipv6.conf.all.disable_ipv6 = 1"
-        state: present
       when: ansible_distribution == "Fedora"
 
-    - name: Disable ipv6 for now
-      ansible.builtin.lineinfile:
-        path: /etc/sysctl.conf
-        line: "net.ipv6.conf.default.disable_ipv6 = 1"
-        state: present
+    - name: Enable DL1 module stream 1/2
+      ansible.builtin.command: dnf module enable -y idm:DL1
+      when: ansible_distribution == "CentOS"
+
+    - name: Enable DL1 module stream 2/2
+      ansible.builtin.command: dnf distro-sync
+      when: ansible_distribution == "CentOS"
+
+    - name: Install freeipa
+      ansible.builtin.command: dnf -y install freeipa-server freeipa-server-dns bind-dyndb-ldap
       when: ansible_distribution == "Fedora"
 
-    - name: Disable ipv6 for now
-      ansible.builtin.lineinfile:
-        path: /etc/sysctl.conf
-        line: "net.ipv6.conf.lo.disable_ipv6 = 1"
-        state: present
-      when: ansible_distribution == "Fedora"
+        #- name: enable IPv6 on the loopback interface
+        #  ansible.builtin.lineinfile:
+        #    path: /etc/sysctl.conf
+        #    line: "net.ipv6.conf.all.disable_ipv6 = 0"
+        #    state: present
+        #  when: ansible_distribution == "Fedora"
 
-    - name: Apply freshly added ipv6 kernel parameters
-      ansible.builtin.command: sysctl -p
+        #- name: Apply freshly added ipv6 kernel parameters
+        #  ansible.builtin.command: sysctl -p
+        #  when: ansible_distribution == "Fedora"
 
-    - name: Reboot the server
-      ansible.builtin.reboot:
-        reboot_timeout: 600
+        #- name: Reboot the server
+        #  ansible.builtin.reboot:
+        #    reboot_timeout: 600
+        #  when: ansible_distribution == "Fedora"
 
     - name: Setup freeipa
-      ansible.builtin.command: "ipa-server-install \
-                                --unattended \
-                                --setup-dns \
-                                --hostname={{ ipa_fqdn }} \
-                                --realm=KP.ORG \
-                                --domain=KP.ORG \
-                                --ds-password={{ ds_password }} \
-                                --admin-password={{ admin_password }} \
-                                --auto-forwarders \
-                                --auto-reverse"
-
+      ansible.builtin.command: 
+        cmd: "ipa-server-install \
+              --unattended \
+              --hostname={{ ipa_fqdn }} \
+              --realm=KP.ORG \
+              --domain=KP.ORG \
+              --ds-password={{ ds_password }} \
+              --admin-password={{ admin_password }} \
+              --ntp-server={{ custom_ntp_server }}"
+      when: ansible_distribution == "Fedora"
 
           #- name: Create a /docker/keycloak directory
           #  ansible.builtin.file:

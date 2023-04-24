@@ -1,0 +1,48 @@
+---
+- name: Setup freeipa server (LDAP) - Fedora
+  hosts: all
+  become: true
+  strategy: free
+  gather_facts: true
+  become_method: sudo
+  vars:
+     - ipa_fqdn: ipa.kp.org
+     - ipa_server_domain: ipa.kp.org
+     - admin_password: admin12345
+     - ds_password: admin12345
+     - custom_ntp_server: 2.si.pool.ntp.org
+     - client_hostname: "client{{ peer_id }}.kp.org"
+   tasks:
+
+     - name: Install required packages for the ipa client
+       ansible.builtin.apt:
+         name: ipa-client
+         state: present
+         update_cache: yes
+       when: ansible_distribution == "Ubuntu"
+
+     - name: Add server to /etc/hosts
+       ansible.builtin.lineinfile:
+         path: /etc/hosts
+         line: "{{ main_server_ip }} {{ ipa_fqdn }} ipa"
+       when: ansible_distribution == "Ubuntu"
+
+     - name: Add client to /etc/hosts
+       ansible.builtin.lineinfile:
+         path: /etc/hosts
+         line: "{{ ansible_default_ipv4.address }} {{ client_hostname }} client1"
+       when: ansible_distribution == "Ubuntu"
+
+     - name: Setup freeipa-client
+       ansible.builtin.command: 
+         cmd: "ipa-client-install \
+               --domain {{ ipa_server_domain }} \
+               --server {{ ipa_fqdn }} \
+               --hostname={{ client_hostname }} \
+               --principal=admin \
+               --password={{ admin_password }} \
+               --ntp-server={{ custom_ntp_server }} \
+               --mkhomedir \
+               --fixed-primary \
+               --unattended"
+       when: ansible_distribution == "Ubuntu"
