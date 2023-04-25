@@ -1,0 +1,28 @@
+---
+- name: Fetch info from the server
+  hosts: all
+  become: true
+  strategy: free
+  gather_facts: true
+  become_method: sudo
+  
+  tasks:
+    - name: Print the server's IP address
+      ansible.builtin.debug:
+        msg: "The server's IP address is {{ ansible_default_ipv4.address }}"
+  
+    - name: Print the server's hostname
+      ansible.builtin.debug:
+        msg: "The server's hostname is {{ ansible_hostname }}"
+  
+    - name: Print the server's domain
+      ansible.builtin.debug:
+        msg: "The server's domain is {{ ansible_domain }}"
+  
+    - name: Print the server's FQDN
+      ansible.builtin.debug:
+        msg: "The server's FQDN is {{ ansible_fqdn }}"
+  
+    - name: Print the server's MAC address
+      ansible.builtin.debug:
+        msg: "The server's MAC address is {{ ansible_default_ipv4.macaddress }}" 

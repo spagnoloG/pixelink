@@ -104,6 +104,20 @@ set interfaces ethernet eth2 firewall local name 'INTERNAL_LOCAL'
 set interfaces ethernet eth1 firewall in name 'DMZ_IN'
 set interfaces ethernet eth1 firewall local name 'DMZ_LOCAL'
 
+# Static ip addresses
+# DMZ
+set service dhcp-server shared-network-name DMZ subnet 10.6.0.0/24 static-mapping DMZ_FREEIPA ip-address 10.6.0.105
+set service dhcp-server shared-network-name DMZ subnet 10.6.0.0/24 static-mapping DMZ_FREEIPA mac-address '00:0c:29:5a:fd:a6'
+set service dhcp-server shared-network-name DMZ subnet 10.6.0.0/24 static-mapping DMZ_NAMESERVER ip-address 10.6.0.100
+set service dhcp-server shared-network-name DMZ subnet 10.6.0.0/24 static-mapping DMZ_NAMESERVER mac-address '00:0c:29:2e:eb:e6'
+set service dhcp-server shared-network-name DMZ subnet 10.6.0.0/24 static-mapping DMZ_HTTPSERVER ip-address 10.6.0.102
+set service dhcp-server shared-network-name DMZ subnet 10.6.0.0/24 static-mapping DMZ_HTTPSERVER mac-address '00:0c:29:88:1f:81'
+
+# DNS
+set system name-server 10.6.0.100
+set service dns forwarding name-server 10.6.0.100
+set service dns forwarding listen-address 10.6.0.1
+
 commit
 save
 exit

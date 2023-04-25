@@ -70,6 +70,12 @@
         #  ansible.builtin.reboot:
         #    reboot_timeout: 600
         #  when: ansible_distribution == "Fedora"
+        #
+    - name: Check if freeipa is already installed
+      ansible.builtin.stat:
+        path: /etc/ipa/default.conf
+      register: ipa_installed
+      when: ansible_distribution == "Fedora"
 
     - name: Setup freeipa
       ansible.builtin.command: 
@@ -81,7 +87,19 @@
               --ds-password={{ ds_password }} \
               --admin-password={{ admin_password }} \
               --ntp-server={{ custom_ntp_server }}"
-      when: ansible_distribution == "Fedora"
+      when: ansible_distribution == "Fedora" and ipa_installed.stat.exists == false
+
+    - name: Check if admin user already exists
+      command: ipa user-show admin
+      register: admin_user
+      ignore_errors: yes
+
+    - name: Init Kerberos admin user
+      command: kinit admin
+      args:
+        stdin: "{{ admin_password }}"
+      when: admin_user.rc != 0
+   
 
           #- name: Create a /docker/keycloak directory
           #  ansible.builtin.file:
