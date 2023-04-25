@@ -18,8 +18,8 @@ Ansible (not needed for now):
 ansible-galaxy install -r requirements.yml
 ```
 
-### Setup DMZ nameserver
+###  Run the playbooks with convinent script 
 ```bash
-make dmz_nameserver
+make all
 ```
 

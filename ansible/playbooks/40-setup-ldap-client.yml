@@ -11,28 +11,38 @@
      - admin_password: admin12345
      - ds_password: admin12345
      - custom_ntp_server: 2.si.pool.ntp.org
-     - client_hostname: "client{{ peer_id }}.kp.org"
-   tasks:
-
+     - client_hostname: "{{ ansible_hostname }}.kp.org"
+     - main_server_ip: 10.6.0.105
+  tasks:
      - name: Install required packages for the ipa client
        ansible.builtin.apt:
-         name: ipa-client
+         name: freeipa-client
          state: present
          update_cache: yes
        when: ansible_distribution == "Ubuntu"
+
+     - name: Install required packages for the ipa client
+       ansible.builtin.dnf:
+         name: ipa-client
+         state: present
+         update_cache: yes
+       when: ansible_distribution == "Fedora"
 
      - name: Add server to /etc/hosts
        ansible.builtin.lineinfile:
          path: /etc/hosts
          line: "{{ main_server_ip }} {{ ipa_fqdn }} ipa"
-       when: ansible_distribution == "Ubuntu"
 
      - name: Add client to /etc/hosts
        ansible.builtin.lineinfile:
          path: /etc/hosts
-         line: "{{ ansible_default_ipv4.address }} {{ client_hostname }} client1"
-       when: ansible_distribution == "Ubuntu"
+         line: "{{ ansible_default_ipv4.address }} {{ client_hostname }} client"
 
+     - name: Check if freeipa has been installed
+       ansible.builtin.stat:
+         path: /etc/ipa/default.conf
+       register: ipa_installed
+    
      - name: Setup freeipa-client
        ansible.builtin.command: 
          cmd: "ipa-client-install \
@@ -45,4 +55,4 @@
                --mkhomedir \
                --fixed-primary \
                --unattended"
-       when: ansible_distribution == "Ubuntu"
+       when: ipa_installed.stat.exists == false
