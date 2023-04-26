@@ -112,11 +112,21 @@ set service dhcp-server shared-network-name DMZ subnet 10.6.0.0/24 static-mappin
 set service dhcp-server shared-network-name DMZ subnet 10.6.0.0/24 static-mapping DMZ_NAMESERVER mac-address '00:0c:29:2e:eb:e6'
 set service dhcp-server shared-network-name DMZ subnet 10.6.0.0/24 static-mapping DMZ_HTTPSERVER ip-address 10.6.0.102
 set service dhcp-server shared-network-name DMZ subnet 10.6.0.0/24 static-mapping DMZ_HTTPSERVER mac-address '00:0c:29:88:1f:81'
+set service dhcp-server shared-network-name INTERNAL subnet 192.168.6.0/24 static-mapping INTERNAL_UBUNTU_DESKTOP_1 ip-address 192.168.6.104
+set service dhcp-server shared-network-name INTERNAL subnet 192.168.6.0/24 static-mapping INTERNAL_UBUNTU_DESKTOP_1 mac-address '00:0c:29:50:77:94'
 
 # DNS
 set system name-server 10.6.0.100
 set service dns forwarding name-server 10.6.0.100
 set service dns forwarding listen-address 10.6.0.1
+
+
+# Firewall
+set firewall name ALLOW_10_6_TO_192_NAMESERVER rule 10 action accept
+set firewall name ALLOW_10_6_TO_192_NAMESERVER rule 10 source address 10.6.0.100/32
+set firewall name ALLOW_10_6_TO_192_NAMESERVER rule 10 destination address 192.168.6.0/24
+
+
 
 commit
 save

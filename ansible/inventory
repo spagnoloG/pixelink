@@ -1,16 +1,16 @@
 [proxy]
-jump_host ansible_host=88.200.24.236 ansible_user=vyos ansible_ssh_private_key_file=~/.ssh/keys/id_ed25519_rk_vyos become=true become_method=sudo
+jump_host ansible_host=88.200.24.236 ansible_user=vyos ansible_ssh_private_key_file=~/.ssh/keys/id_ed25519_kp_vyos become=true become_method=sudo
 
 [DMZ]
 dmz_nameserver ansible_host=10.6.0.100 ansible_connection=ssh ansible_user=ubuntu_dmz ansible_ssh_pass=laboratorijzaintegracijo become=true become_method=sudo ansible_become_pass=laboratorijzaintegracijo
 dmz_ipaserver ansible_host=10.6.0.105 ansible_connection=ssh ansible_user=fedora_dmz ansible_ssh_pass=laboratorijzaintegracijo become=true become_method=sudo ansible_become_pass=laboratorijzaintegracijo
 dmz_httpserver ansible_host=10.6.0.102 ansible_connection=ssh ansible_user=ubuntu_dmz ansible_ssh_pass=laboratorijzaintegracijo become=true become_method=sudo ansible_become_pass=laboratorijzaintegracijo
 
-[INTERNAL}
-internal_ubuntu_desktop_1 ansible_host= ansible_connection=ssh ansible_user=ubuntu_internal ansible_ssh_pass=laboratorijzaintegracijo become=true become_method=sudo ansible_become_pass=laboratorijzaintegracijo
+[INTERNAL]
+internal_ubuntu_desktop_1 ansible_host=192.168.6.104 ansible_connection=ssh ansible_user=ubuntu_internal ansible_ssh_pass=laboratorijzaintegracijo become=true become_method=sudo ansible_become_pass=laboratorijzaintegracijo
 
 [DMZ:vars]
-ansible_ssh_common_args='-o ProxyCommand="ssh -i ~/.ssh/keys/id_ed25519_rk_vyos -W %h:%p -q vyos@88.200.24.236"'
+ansible_ssh_common_args='-o ProxyCommand="ssh -i ~/.ssh/keys/id_ed25519_kp_vyos -W %h:%p -q vyos@88.200.24.236"'
 
 [INTERNAL:vars]
-ansible_ssh_common_args='-o ProxyCommand="ssh -i ~/.ssh/keys/id_ed25519_rk_vyos -W %h:%p -q vyos@88.200.24.236"'
+ansible_ssh_common_args='-o ProxyCommand="ssh -i ~/.ssh/keys/id_ed25519_kp_vyos -W %h:%p -q vyos@88.200.24.236"'

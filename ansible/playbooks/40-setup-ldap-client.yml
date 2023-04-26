@@ -1,5 +1,5 @@
 ---
-- name: Setup freeipa server (LDAP) - Fedora
+- name: Setup  LDAP client (Freeipa)
   hosts: all
   become: true
   strategy: free
@@ -16,7 +16,9 @@
   tasks:
      - name: Install required packages for the ipa client
        ansible.builtin.apt:
-         name: freeipa-client
+         pkg: 
+           - freeipa-client
+           - oddjob-mkhomedir
          state: present
          update_cache: yes
        when: ansible_distribution == "Ubuntu"
@@ -56,3 +58,19 @@
                --fixed-primary \
                --unattended"
        when: ipa_installed.stat.exists == false
+
+     - name: Update PAM configuration for GDM login
+       ansible.builtin.blockinfile:
+         path: /etc/pam.d/common-session
+         marker: "# {mark} ANSIBLE MANAGED BLOCK"
+         block: |
+           session required pam_mkhomedir.so skel=/etc/skel/ umask=0022
+       notify: Restart gdm
+       when: ansible_distribution == "Ubuntu" and ansible_distribution_version == '20.04'
+
+  handlers:
+    - name: Restart gdm
+      ansible.builtin.systemd:
+        name: gdm
+        state: restarted
+

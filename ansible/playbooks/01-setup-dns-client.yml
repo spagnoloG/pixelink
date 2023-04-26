@@ -1,0 +1,33 @@
+- name: Setup DNS client 
+  hosts: all
+  become: true
+  strategy: free
+  gather_facts: true
+  become_method: sudo
+  vars:
+    - dns_servers: "10.6.0.100 8.8.8.8 8.8.4.4"
+  tasks:
+    - name: Ensure systemd-resolved config directory exists
+      ansible.builtin.file:
+        path: /etc/systemd/resolved.conf.d
+        state: directory
+        owner: root
+        group: root
+        mode: '0755'
+
+    - name: Create custom systemd-resolved config file
+      ansible.builtin.copy:
+        content: |
+          [Resolve]
+          DNS={{ dns_servers }}
+        dest: /etc/systemd/resolved.conf.d/custom_dns_servers.conf
+        owner: root
+        group: root
+        mode: '0644'
+      notify: Restart systemd-resolved
+
+  handlers:
+    - name: Restart systemd-resolved
+      ansible.builtin.systemd:
+        name: systemd-resolved
+        state: restarted
