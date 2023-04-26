@@ -21,7 +21,7 @@
 ## TODO LIST
 
 - [x] uporabniki in strežniki morajo biti vsak v svojem segmentu.
-- [ ] "opcijsko" uporabiti morate heterogene operacijske sisteme (vsaj po en Windows, Linux)
+- [x] "opcijsko" uporabiti morate heterogene operacijske sisteme (vsaj po en Windows, Linux)
 - [x] segment "uporabniki" naj ima omrežje 10.X.0.0/24 in segment "strežniki" naj ima omrežje 192.168.X.0/24 (pri čemer je X=številka vaše skupine). Vaš ISP (LRK :)) vam je dodelil eno "zunanjo" IP številko in IPv6 naslovni prostor.
 - [ ] V omrežju imejte tudi en segment, ki bo uporabljal samo IPv6 protokol (ipv6only). V njem uporabite privatne IPv6 naslove (unique local address - ULA), in jih s tehniko NPTv6 (IPv6-to-IPv6 Network Prefix Translation - RFC 6296) preslikajte v enega izmed vam dodeljenih zunanjih IPv6 segmentov, ki ga še niste uporabili kje drugje (dodeljeni /62 je razdeljen na 4x /64, prvi je za povezavo z internetom, dva za dual stack omrežji DMZ in internal, zadnji pa za NPTv6 ipv6-only segment. NPTv6 je v Vyosu podprt v verziji VyOS >=1.2.
 - [x] Nastavite ostale pomembne parametre: DNS, domensko ime, NTP strežnike, ... (torej vse "splošne" nastavitve, ki jih potrebujete v podjetju). Uredite DNS posredovanje in split DNS konfiguracijo (en ("zunanji") DNS za zunanje naslove, če pa pride zahteva znotraj omrežja, ga preusmerite v notranji (split) DNS strežnik, ki vrača notranje privatne IP naslove strežnikov v DMZ.
