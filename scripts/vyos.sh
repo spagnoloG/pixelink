@@ -114,6 +114,9 @@ set service dhcp-server shared-network-name DMZ subnet 10.6.0.0/24 static-mappin
 set service dhcp-server shared-network-name DMZ subnet 10.6.0.0/24 static-mapping DMZ_HTTPSERVER mac-address '00:0c:29:88:1f:81'
 set service dhcp-server shared-network-name INTERNAL subnet 192.168.6.0/24 static-mapping INTERNAL_UBUNTU_DESKTOP_1 ip-address 192.168.6.104
 set service dhcp-server shared-network-name INTERNAL subnet 192.168.6.0/24 static-mapping INTERNAL_UBUNTU_DESKTOP_1 mac-address '00:0c:29:50:77:94'
+set service dhcp-server shared-network-name INTERNAL subnet 192.168.6.0/24 static-mapping INTERNAL_VPNSERVER ip-address 192.168.6.105
+set service dhcp-server shared-network-name INTERNAL subnet 192.168.6.0/24 static-mapping INTERNAL_VPNSERVER mac-address '00:0c:29:2e:eb:e6'
+
 
 # DNS
 set system name-server 10.6.0.100

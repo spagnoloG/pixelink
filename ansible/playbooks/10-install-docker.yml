@@ -7,45 +7,64 @@
   become_method: sudo
   tasks:
 
+    - name: Update the apt package index
+      apt:
+        update_cache: true
+      when: ansible_distribution == "Ubuntu"
+
     - name: Install required system packages
       apt:
         pkg:
-          - apt-transport-https
           - ca-certificates
           - curl
-          - software-properties-common
-          - python3-pip
-          - virtualenv
-          - python3-setuptools
+          - gnupg
         state: latest
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Create apt keyrings directory
+      ansible.builtin.file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: '0755'
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Add Docker's official GPG key
+      ansible.builtin.shell:
+        cmd: "curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --no-tty --dearmor -o /etc/apt/keyrings/docker.gpg && chmod a+r /etc/apt/keyrings/docker.gpg"
+      ignore_errors: yes
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Set up the Docker repository
+      ansible.builtin.shell:
+        cmd: 'echo "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu {{ ansible_lsb.codename }} stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null'
+      when: ansible_distribution == "Ubuntu"
+
+    - name: Update the apt package index again
+      apt:
         update_cache: true
+      when: ansible_distribution == "Ubuntu"
 
-    - name: Add Docker GPG apt Key
-      apt_key:
-        url: https://download.docker.com/linux/ubuntu/gpg
-        state: present
-
-    - name: Add Docker Repository
-      apt_repository:
-        repo: deb https://download.docker.com/linux/ubuntu jammy stable
-        state: present
-
-    - name: Update apt and install docker-ce
+    - name: Install Docker Engine, containerd, and Docker Compose plugins
       apt:
         pkg:
           - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
           - docker-compose-plugin
         state: latest
-        update_cache: true
+      when: ansible_distribution == "Ubuntu"
 
-    - name: Install Docker Module for Python (ansible needs this to work)
-      pip:
-        name: 
-          - docker
-          - docker-compose
-    
+    - name: Add user to docker group
+      ansible.builtin.user:
+        name: "{{ ansible_user }}"
+        groups: docker
+        append: yes
+      when: ansible_distribution == "Ubuntu"
+
     - name: Ensure Docker is enabled and running
       ansible.builtin.systemd:
         name: docker
         state: started
         enabled: yes
+      when: ansible_distribution == "Ubuntu"
