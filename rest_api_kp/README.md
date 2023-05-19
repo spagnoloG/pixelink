@@ -10,6 +10,13 @@ docker run -d -p 27017:27017 --name mongo mongo
 python main.py
 ```
 
+### content negotiation
+```
+curl -X GET -H "Accept: application/json" http://localhost:5000/users
+curl -X GET -H "Accept: application/xml" http://localhost:5000/users
+curl -X GET -H "Accept: text/html" http://localhost:5000/users
+```
+
 ### ldap
 Start the server and mongo
 ```
