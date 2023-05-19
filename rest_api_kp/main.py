@@ -131,26 +131,33 @@ class MessageAPI(Resource):
         accept = request.headers.get('Accept', 'application/json')
         if accept == "*/*":
             accept = 'application/json'
+
         if message_id:
             message = messages.find_one({'_id': ObjectId(message_id)})
             if message is None:
                 response_data = {'message': 'Message not found'}
-                if 'application/json' in accept:
-                    return response_data, 404
-                elif 'application/xml' in accept:
-                    return dicttoxml.dicttoxml(response_data).decode(), 404, {'Content-Type': 'application/xml'}
-                elif 'text/html' in accept:
-                    template = '<html><body><h1>{{ message }}</h1></body></html>'
-                    return render_template_string(template, message=response_data['message']), 404, {'Content-Type': 'text/html'}
-                else:
-                    return {"message": "Unsupported Media Type"}, 415
+                return self.render_response(response_data, accept, 404)
             message['_id'] = str(message['_id'])
-            return message
+            return self.render_response(message, accept)
+
+        all_messages = list(messages.find())
+        for message in all_messages:
+            message['_id'] = str(message['_id'])
+        return self.render_response(all_messages, accept)
+
+    def render_response(self, data, accept, status_code=200):
+        if 'application/json' in accept:
+            return data, status_code
+        elif 'application/xml' in accept:
+            xml = dicttoxml.dicttoxml(data).decode()
+            return xml, status_code, {'Content-Type': 'application/xml'}
+        elif 'text/html' in accept:
+            template = '<html><body><h1>{{ data }}</h1></body></html>'
+            html = render_template_string(template, data=data)
+            return html, status_code, {'Content-Type': 'text/html'}
         else:
-            all_messages = list(messages.find())
-            for message in all_messages:
-                message['_id'] = str(message['_id'])
-            return all_messages
+            return {"message": "Unsupported Media Type"}, 415
+
 
 
     def post(self):
