@@ -114,8 +114,8 @@ set service dhcp-server shared-network-name DMZ subnet 10.6.0.0/24 static-mappin
 set service dhcp-server shared-network-name DMZ subnet 10.6.0.0/24 static-mapping DMZ_HTTPSERVER mac-address '00:0c:29:88:1f:81'
 set service dhcp-server shared-network-name INTERNAL subnet 192.168.6.0/24 static-mapping INTERNAL_UBUNTU_DESKTOP_1 ip-address 192.168.6.104
 set service dhcp-server shared-network-name INTERNAL subnet 192.168.6.0/24 static-mapping INTERNAL_UBUNTU_DESKTOP_1 mac-address '00:0c:29:50:77:94'
-set service dhcp-server shared-network-name INTERNAL subnet 192.168.6.0/24 static-mapping INTERNAL_VPNSERVER ip-address 192.168.6.105
-set service dhcp-server shared-network-name INTERNAL subnet 192.168.6.0/24 static-mapping INTERNAL_VPNSERVER mac-address '00:0c:29:2e:eb:e6'
+set service dhcp-server shared-network-name INTERNAL subnet 192.168.6.0/24 static-mapping INTERNAL_VPNSERVER ip-address 192.168.6.106
+set service dhcp-server shared-network-name INTERNAL subnet 192.168.6.0/24 static-mapping INTERNAL_VPNSERVER mac-address '00:0c:29:a9:43:97'
 
 
 # DNS
@@ -129,6 +129,24 @@ set firewall name ALLOW_10_6_TO_192_NAMESERVER rule 10 action accept
 set firewall name ALLOW_10_6_TO_192_NAMESERVER rule 10 source address 10.6.0.100/32
 set firewall name ALLOW_10_6_TO_192_NAMESERVER rule 10 destination address 192.168.6.0/24
 
+# VPN (setup wireguard instead of this crap)
+set nat destination rule 1000  description 'Wireguard destination nat'
+set nat destination rule 1000  destination port 51820 
+set nat destination rule 1000  inbound-interface eth0
+set nat destination rule 1000  protocol udp
+set nat destination rule 1000  translation address 192.168.6.106
+set nat destination rule 1000  translation port 51820 
+set nat source rule 1100 description 'Wireguard Source NAT'
+set nat source rule 1100 destination address 192.168.6.106
+set nat source rule 1100 destination port 51820
+set nat source rule 1100 outbound-interface eth0
+set nat source rule 1100 protocol udp
+set nat source rule 1100 source address 0.0.0.0/24 
+set nat source rule 1100 translation address masquerade
+set firewall name WAN_IN rule 1000 action accept
+set firewall name WAN_IN rule 1000 description 'Allow Wireguard'
+set firewall name WAN_IN rule 1000 destination port 51820 
+set firewall name WAN_IN rule 1000 protocol udp
 
 
 commit
