@@ -1,0 +1,7 @@
+
+- name: Setup ldap users - Fedora
+  hosts: all
+  become: true
+  strategy: free
+  gather_facts: true
+  become_method: sudo

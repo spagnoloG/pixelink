@@ -30,11 +30,11 @@
 - [x] na VyOS statično
 - [x] "vsaj" na enemu segmentu z uporabo SLAAC
 - [x] "vsaj" na enem segmentu z uporabo DHCPv6
-- [ ] Sprogramirajte eno REST storitev, kakšne vire (resources) boste izpostavili vašim uporabnikom se lahko odločite sami. Vira naj bosta vsaj dva, med seboj vsaj nekoliko povezana (npr. torej podobno kot je bilo predstavljeno na vajah za stranke in naročila).
-- [ ] viri naj podpirajo tehnike pogajanja o vsebini (content negotiation), podpreti morate vsaj tri formate (XML, JSON in enega poljubnega - html, text, itd.). 
-- [ ] "opcijsko" Vsaj ena operacija nad podatki naj bo zaščitena, torej dostopna samo izbrani skupini uporabnikov, ki so vpisani v enem od LDAP strežnikov. Razmislite, katere operacije bodo "prosto" dostopne, katere pa so takšne, da jih lahko uporabljajo le avtenticirani in avtorizirani uporabniki.
-- [ ] povezave do vaših REST storitev naj bodo varne
-- [ ] "opcijsko" Storitve naj bodo povezane s podatkovno bazo, tako da se vsebina ohrani tudi ob ponovnem zagonu strežnika
+- [x] Sprogramirajte eno REST storitev, kakšne vire (resources) boste izpostavili vašim uporabnikom se lahko odločite sami. Vira naj bosta vsaj dva, med seboj vsaj nekoliko povezana (npr. torej podobno kot je bilo predstavljeno na vajah za stranke in naročila).
+- [x] viri naj podpirajo tehnike pogajanja o vsebini (content negotiation), podpreti morate vsaj tri formate (XML, JSON in enega poljubnega - html, text, itd.). 
+- [x] "opcijsko" Vsaj ena operacija nad podatki naj bo zaščitena, torej dostopna samo izbrani skupini uporabnikov, ki so vpisani v enem od LDAP strežnikov. Razmislite, katere operacije bodo "prosto" dostopne, katere pa so takšne, da jih lahko uporabljajo le avtenticirani in avtorizirani uporabniki.
+- [x] povezave do vaših REST storitev naj bodo varne
+- [x] "opcijsko" Storitve naj bodo povezane s podatkovno bazo, tako da se vsebina ohrani tudi ob ponovnem zagonu strežnika
 - [ ] Storitve naj bodo dostopne poleg HTTP1.1 tudi preko HTTP/2
 - [ ] "opcijsko" HTTP/3
 - [ ] "opcijsko" enako naredite tudi v GraphQL
@@ -42,8 +42,45 @@
 - [ ] Smiselno postavite požarne zidove. Razmislite (in dokumentirajte!), kakšna naj bodo pravila znotraj vašega omrežja, kakšna za dostop od zunaj in kakšna za izhodni promet, katere storitve boste izpostavili navzven, katere bodo samo notranje dostopne, katere bodo uporabljale vaše stranke, katere pa administratorji sistema... Ne pozabite, da je vaše omrežje IPv4 in IPv6 (t.i. dual stack)
 - [ ] Omrežje mora omogočati oddaljen dostop uporabnikov preko navideznih zasebnih omrežij (VPN dostop do vašega omrežja). Pazite na to, da bo VPN dostop varen.
 - [x] "Opcijsko" Avtentikacija naj se izvaja na vaš aktivni imenik (ali LDAP kot je OpenLDAP). Torej za tiste uporabnike, ki so vpisani v vašem AD strežniku, oz. imajo v njem celo shranjena digitalna potrdila.
-- [ ] Upravljanje in nadzor omrežja in storitev:
+- [x] Upravljanje in nadzor omrežja in storitev:
 - [ ] Skonfigurirajte SNMP za beleženje dogodkov (beleženje vsaj enega vira, npr. spletnega ali aplikacijskega strežnika, procesorja, pomnilnika ... Poskusite najti nekaj smiselnega za vaš primer postavitve), podatki naj bodo vidni grafično (Cacti, Prometheus+Grafana, ali kar koli drugega...), zato nastavite ustrezno kratke intervale za SNMP pooling (da se bo na zagovoru sploh kaj videlo na grafih). 
 - [ ] "opcija" Nastavite netflow ali sflow beleženje tokov, generirajte nekaj prometa, ki naj se nato vidi v analizatorju tokov. Integrirate lahko v Cacti (uporabljali ste ga najbrž zgoraj za SNMP - tu morate instalirati vtičnik - plugin) ali pa uporabite kakšen drug programček, npr. "ntop" (ki ima že vgrajeno podporo) in je to ločena storitev za administratorja vašega omrežja.
 - [ ] "opcija" IDS/IPS: namestite in demostrirajte uporabo IDS/IPS z npr. skeniranjem vašega omrežja z orodjem nmap, uganjevanjem SSH gesla, itd. Uporabite lahko katerokoli odprtokodno rešitev iz tega segmenta, npr. Snort + Snorby, itd.
-- [ ] RAFT: postavite v vašem podjetju primer storitve, ki uporablja protokol RAFT, na vsaj 3 računalnikih. Lahko je karkoli, kar uporablja RAFT, npr. etcd ali kaj podobnega.
+- [x] RAFT: postavite v vašem podjetju primer storitve, ki uporablja protokol RAFT, na vsaj 3 računalnikih. Lahko je karkoli, kar uporablja RAFT, npr. etcd ali kaj podobnega.
+
+
+
+## RAFT 
+
+```bash
+cd RAFT && docker-compose up -d
+docker network inspect bridge
+```
+
+### Join node
+```bash
+curl --location --request POST 'localhost:2221/raft/join' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+	"node_id": "node_2", 
+	"raft_address": "172.17.0.1:1112"
+}'
+```
+
+### Check status
+```bash
+curl localhost:2221/raft/stats
+```
+
+### Get the key
+```bash
+curl --location --request GET localhost:2221/store/tilen
+```
+
+### Set the key
+```bash
+curl --location --request POST 'localhost:2221/store' --header 'Content-Type: application/json' --data-raw '{
+        "key": "tilen",
+        "value": "ozbot"
+}'
+```
