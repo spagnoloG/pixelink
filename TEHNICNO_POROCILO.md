@@ -101,6 +101,106 @@ Z Cacti lahko preko spletnega brskalnika nadzirate porabo pasovne širine in omr
 
 vir: https://www.howtoforge.com/how-to-install-cacti-monitoring-on-ubuntu-22-04/
 
+### NTP streznik
+Vsak server ima konfigurarian slovenski ntp;
+
+```yaml
+---
+- name: Setup ntp 
+  hosts: all
+  become: true
+  strategy: free
+  gather_facts: true
+  become_method: sudo
+  vars:
+    - custom_ntp_server: 2.si.pool.ntp.org
+
+  tasks:
+
+    - name: Install required system packages
+      apt:
+        pkg:
+          - ntp
+          - tzdata
+          - ntpdate
+        state: latest
+        update_cache: true
+
+    - name: Add namserver to ntp.conf
+      lineinfile:
+        path: /etc/ntp.conf
+        line: "pool {{ custom_ntp_server }} iburst"
+        insertafter: EOF
+        state: present
+      notify: Restart ntp
+
+    - name: Set global timezone
+      ansible.builtin.copy:
+        content: "Europe/Ljubljana"
+        dest: /etc/timezone
+        owner: root
+        group: root
+        mode: 0644
+      notify: 
+        - Update localtime
+
+    - name: Set to use local timezone and not UTC
+      ansible.builtin.shell: 'timedatectl set-local-rtc 1'
+
+    - name: Set timezone  
+      ansible.builtin.shell: 'timedatectl set-timezone "Europe/Ljubljana"'
+
+    - name: Force the use of our custom timeserver
+      ansible.builtin.shell: "ntpdate -u {{ custom_ntp_server }}"
+
+    - name: Get current date
+      ansible.builtin.shell: "date"
+      register: current_date
+
+    - name: Print current date
+      ansible.builtin.debug:
+        msg: "{{ current_date.stdout }}"
+   
+  handlers:
+
+    - name: Update localtime
+      command: ln -sf /usr/share/zoneinfo/{{ lookup('file', '/etc/timezone') }} /etc/localtime
+      args:
+        creates: /etc/localtime
+        removes: /etc/localtime
+
+    - name: Restart ntp
+      ansible.builtin.systemd:
+        name: ntp
+        state: restarted
+```
+
+
+### DNS streznik
+
+```bash
+ubuntu_dmz@sk06nameserver:~$ cat /etc/unbound/unbound.conf
+server:
+  interface: 0.0.0.0 # Listen on all interfaces
+  interface: ::0
+  access-control: 10.6.0.0/24 allow
+  access-control: 2001:1470:fffd:95::/64 allow
+  verbosity: 2
+  do-ip6: yes
+  hide-identity: yes
+  hide-version: yes
+
+  local-zone: "ipa.kp.org." static
+  local-data: "ipa.kp.org. IN A 10.6.0.105"
+
+forward-zone:
+  name: "."
+  forward-addr: 8.8.8.8 # Replace with your preferred DNS resolver (e.g., Google DNS)
+  forward-addr: 8.8.4.4 # Replace with your preferred DNS resolver (e.g., Google DNS)
+  forward-addr: 2001:4860:4860::8888 # Replace with your preferred IPv6 DNS resolver (e.g., Google DNS)
+  forward-addr: 2001:4860:4860::8844 # Replace with your preferred IPv6 DNS resolver (e.g., Google DNS)
+```
+
 
 ### RAFT 
 
